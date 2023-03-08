@@ -1,97 +1,78 @@
 
-/* Packages - What tools do I need for this?
-- Install Jest and Inquirer */
+/* Packages -Import Jest and Inquirer */
 const inquirer = require('inquirer');
+const fs = require('fs');
 const jest = require('jest');
+
+const shape = require('./shapes');
+const { join } = require('path');
 const { writeFile } = require('fs/promises');
+const { runInContext } = require('vm');
 //const { createDocument } = require('./document');
 
+/* Instantiate a new Menu class object here and run the main function. */
+class LogoMaker {
+    constructor() { }
 
-/* Entry way to application: index.js 
-Instantiate a new Menu class object here and run the main function.
-*/
-class CLI {
-  constructor() {
-    this.title = '';
+    createLogo() {
+        return inquirer
+            .prompt([
+                {
+                    type: 'input',
+                    name: 'text',
+                    message: 'What text would you like in the logo? (max 3 characters)',
+                    maxLength: 3,
+                },
+                {
+                    type: 'input',
+                    name: 'color',
+                    message: 'Enter color name',
+                },
+                {
+                    type: 'list',
+                    name: 'shape',
+                    message: 'Select a logo shape',
+                    choices: ["circle", "triangle", "square"]
+                },
+                {
+                    type: 'input',
+                    name: 'filename',
+                    message: 'Enter a filename for the SVG file:',
+                    default: 'logo.svg'
+                }
+            ])
+            .then(({ text, color, shape, filename }) => {
+                const logo = shape.create(text, color);
+                const svg = logo.render();
+                return writeFile(join(__dirname, '..', 'output', filename), svg);
+            })
 
-    // Array of task objects e.g. [{ text: string, priority: bool }, ...]
-    this.tasks = [];
-  }
-  run() {
-    return inquirer
-      .prompt([
-        {
-          type: 'input',
-          name: 'name',
-          message: 'Please enter your name',
-        },
-      ])
-      .then(({ name }) => {
-        this.title = `${name}'s Tasks`;
-        return this.createLogo();
-      })
-      .then(() => {
-        // sort by priority so that priority tasks come before non-priority tasks
-        this.tasks.sort((a, b) =>
-          a.priority === b.priority ? 0 : a.priority && !b.priority ? -1 : 1
-        );
+            /*
+            const renderShape = (shape) => {
+                if (shape === "circle") {
+                    return ``
+                }
+                if (shape === "triangle") {
+                    return ``
+                }
+                if (shape === "square") {
+                    return ``
+                }
+            } */
+            // return console log message 
+            .then(() => console.log(`Logo generated and saved to ${filename}.`))
+            .catch((err) => {
+                console.log(err);
+                console.log('Oops. Something went wrong.');
+            });
+    }
 
-        //
-        const renderShape = (shape) => {
-            if (shape === "circle") {
-                return ``
-            }
-            if (shape === "triangle") {
-                return ``
-            }
-            if (shape === "square") {
-                return ``
-            }
-        }
-
-        return writeFile(
-          join(__dirname, '..', 'output', 'tasks.html'),
-          createDocument(this.title, this.tasks)
-        );
-      })
-      .then(() => console.log('Created tasks.html'))
-      .catch((err) => {
-        console.log(err);
-        console.log('Oops. Something went wrong.');
-      });
-  }
-
-  createLogo() {
-    return inquirer
-      .prompt([
-        {
-          type: 'input',
-          name: 'text',
-          message: 'What text would you like in the logo? (max 3 characters)',
-          maxLength: 3, 
-        },
-        {
-          type: 'input',
-          name: 'color',
-          message: 'Enter color name',
-        },
-        {
-          type: 'list',
-          name: 'shape',
-          message: 'Select a logo shape',
-          choices: ["circle", "triangle", "square"]
-        },
-      ])
-      .then(({ text, priority, confirmAddTask }) => {
-        this.tasks.push({ text, priority });
-        if (confirmAddTask) {
-          return this.createLogo();
-        }
-      });
-  }
+    run() {
+        this.createLogo();
+    }
 }
 
-module.exports = CLI;
+module.exports = LogoMaker;
 
 /*
 Classes:
