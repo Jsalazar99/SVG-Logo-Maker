@@ -7,8 +7,7 @@ const { Circle, Square, Triangle } = require('./lib/shapes');
 // const { join } = require('path');
 const { writeFile } = require('fs/promises');
 
-/* Instantiate a new Menu class object here and run the main function. */
-
+/* Start the main function for SVG generator */
 function createLogo() {
 
     return inquirer
@@ -20,7 +19,7 @@ function createLogo() {
                 // check if text input is 3 or less 
                 validate: function (input) {
                     if (input.length > 3) {
-                        return "please 3 max";
+                        return "Please 3 letters max";
                     }
                     return true;
                 },
@@ -47,7 +46,6 @@ function createLogo() {
         .then((answers) => {
 
             let shape;
-            let filename = answers.filename;
 
             if (answers.shape === "circle") {
                 shape = new Circle();
@@ -79,13 +77,14 @@ function createLogo() {
 
         })
 
-        .then((data) => {
+        .then((answers) => {
             // return writeFile(join(__dirname, '..', 'examples', 'logo.svg'), data);
-            fs.writeFileSync(`./examples/${filename}.svg`, data)
+            let filename = answers.filename;
+            fs.writeFileSync(`./examples/${answers.filename}.svg`, answers)
         })
 
         // return console log message 
-        .then(() => console.log(`Logo generated and saved to ${filename}.`))
+        .then(() => console.log(`Logo generated and saved to Examples folder.`))
         .catch((err) => {
             // catch method for error handling 
             console.log('<--- Oops. Something went wrong. --->');
@@ -93,15 +92,3 @@ function createLogo() {
         });
 }
 createLogo()
-
-/*
-Classes:
-1. Menu class - Ask the questions for the prompt
-    1a. We need to have a main method and everything will go in here
-    1b. collect user input with inquirer prompts
-        1ba. Text for the logo 1bb. Text color    1bc. Shape Type  1bd. Shape Color
-    1c. Which shape did the user select?
-        1ca. Instantiate a new shape object with the chosen shape
-        1cb. Using the object, set the color
-    1d. Instantiate a new SVG object with the text AND the shape selected
-    1e. Write the SVG object to file called `logo.svg` */
